@@ -1,5 +1,4 @@
 (import ./index :as idx)
-(import ./c-cursor :as cc)
 (import ./c-query :as cq)
 
 ########################################################################
