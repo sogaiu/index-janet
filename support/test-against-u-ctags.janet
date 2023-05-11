@@ -29,7 +29,7 @@
         (get tag-dict (next tag-dict)))
       (when (= path tag-path)
         (eachp [id tag] tag-dict
-          (put-in ds 
+          (put-in ds
                   [path id] tag)))))
   #
   ds)
@@ -64,13 +64,8 @@
   [& argv]
 
   (def native-tags-path
-    "../janet/TAGS")
-
-  (def u-ctags-tags-path
-    (string (os/getenv "HOME") "/src/janet-ref/janet/TAGS"))
-
-  (def native-tags-path
     (get argv 1))
+
   (def u-ctags-tags-path
     (get argv 2))
 
@@ -79,7 +74,7 @@
 
   (def u-ctags-src
     (slurp u-ctags-tags-path))
-  
+
   (def nm-tags
     (->> (peg/match etags/etags-grammar native-src)
          (filter |(not (empty? $)))))

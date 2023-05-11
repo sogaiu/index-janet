@@ -29,6 +29,37 @@
   #
   filtered)
 
+(defn get-all-pieces
+  [src-str captures]
+  (def results @[])
+  (var cur-line 1)
+  (var pos 0)
+  # XXX: will \n work on all platforms?
+  (def eol "\n")
+  (def eol-len (length eol))
+  (each entry captures
+    # XXX: have position here, but ignoring
+    (def [line-no _ _ id] entry)
+    (def line-diff
+      (- line-no cur-line))
+    (repeat line-diff
+      (set pos
+           (+ (string/find eol src-str pos)
+              eol-len)))
+    (def end-pos
+      (+ (string/find eol src-str pos)
+         eol-len))
+    (array/push results
+                [(string/slice src-str
+                               pos (- end-pos eol-len))
+                 id
+                 (string line-no)
+                 (string pos)])
+    (set pos end-pos)
+    (set cur-line (inc line-no)))
+  #
+  results)
+
 (defn index-file!
   [src path tags-fn out-buf]
   (def form-feed

@@ -88,61 +88,37 @@
   # XXX: eventually index other janet files in source tree too?
   #      only seemed to ever index boot.janet
 
-  # XXX
-  (def start (os/clock))
   (ij/index-janet-boot! out-buf)
-  (printf "index-janet-boot!: %p" (- (os/clock) start))
 
-  # XXX
-  (def start (os/clock))
   (each name (os/dir "src/core/")
     (def path (string "src/core/" name))
     # XXX
     (var src (slurp path))
-    (print path)
     (cond
       (= "io.c" name)
-      (do
-        (def start (os/clock))
-        (ic/index-janet-core-def-c! src path out-buf)
-        (printf "index-janet-core-def-c!: %s: %p"
-                path (- (os/clock) start)))
+      (ic/index-janet-core-def-c! src path out-buf)
       #
       (= "math.c" name)
       (do
-        (def start (os/clock))
         (ic/index-math-c! src path out-buf)
-        (printf "index-math-c!: %p" (- (os/clock) start))
-        (def start (os/clock))
-        (ic/index-janet-core-def-c! src path out-buf)
-        (printf "index-janet-core-def-c!: %s: %p"
-                path (- (os/clock) start)))
+        (ic/index-janet-core-def-c! src path out-buf))
       #
       (= "specials.c" name)
-      (do
-        (def start (os/clock))
-        (ic/index-specials-c! src path out-buf)
-        (printf "index-specials-c!: %p" (- (os/clock) start)))
+      (ic/index-specials-c! src path out-buf)
       #
       (= "corelib.c" name)
-      (do
-        (def start (os/clock))
-        (ic/index-corelib-c! src path out-buf)
-        (printf "index-corelib-c!: %p" (- (os/clock) start)))
+      (ic/index-corelib-c! src path out-buf)
       #
       (= "asm.c" name)
-      (do
-        (def start (os/clock))
-        # XXX: tweak source so it can be parsed
-        (set src
-          (string/replace "if (_setjmp(a.on_error)) {"
-                          ""
-                          src))))
+      # XXX: tweak source so it can be parsed
+      (set src
+           (string/replace "if (_setjmp(a.on_error)) {"
+                           ""
+                           src)))
     (try
       (ic/index-generic-c! src path out-buf)
       ([e]
         (eprintf "%s %s" e path))))
-  (printf "index c files!: %p" (- (os/clock) start))
 
   (def out-lines
     (if (= out-format "u-ctags")

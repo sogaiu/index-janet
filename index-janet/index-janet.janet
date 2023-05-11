@@ -22,11 +22,8 @@
      <:...>)
     ``)
 
-  # XXX
-  (def start (os/clock))
   (def [results _ loc->node]
     (jq/query query-str src {:blank-delims [`<` `>`]}))
-  (printf "jq/query: %p" (- (os/clock) start))
 
   (def {:grammar loc-grammar
         :issuer issue-id
@@ -35,18 +32,13 @@
         :reset reset}
     (jc/make-infra))
 
-  # XXX
-  (def start (os/clock))
   (def m-raw
     (peg/match loc-grammar src))
-  (printf "peg/match: %p" (- (os/clock) start))
 
   # bounds info at indeces 0, 1, 2, and last 3 elements, so slice
   (def m
     (array/slice m-raw 3 (dec (- 3))))
 
-  # XXX
-  (def start-2 (os/clock))
   (def filtered
     (filter (fn [res]
               (def [_ attrs _] (get res ::name))
@@ -71,12 +63,8 @@
               # XXX: any other things (e.g. compif)?
               (= "compwhen" head-name))
             results))
-  (printf "filtered: %p" (- (os/clock) start-2))
 
-  # XXX
-  #(def start-3 (os/clock))
   (idx/get-first-lines-and-offsets! src filtered ::name)
-  #(printf "get-first-lines-and-offsets!: %p" (- (os/clock) start-3))
 
   # input:
   #
