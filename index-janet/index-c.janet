@@ -239,7 +239,12 @@
                        # e.g. "(file/temp)" or "(peg/compile peg)"
                        (cmt (sequence `"(`
                                       (line) (column) (position)
-                                      (capture (to (set " )"))))
+                                      (capture (to (choice (set ` )`)
+                                                           # janet 1.17.0 has
+                                                           # an error in doc
+                                                           # for
+                                                           # fiber/last-value
+                                                           `"`))))
                             ,|[$0 $1 $2 $3]))
       :non-match 1})
 
