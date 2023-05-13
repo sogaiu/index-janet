@@ -89,7 +89,8 @@
                      (length line-no)
                      # comma
                      1
-                     (length file-offset)
+                     # XXX: char- vs byte- offset issue
+                     #(length file-offset)
                      # XXX: eol
                      1))
                 0
@@ -113,8 +114,9 @@
                    # line
                    line-no
                    ","
+                   # XXX: char- vs byte- offset issue
                    # offset from start of file
-                   file-offset
+                   #file-offset
                    eol)))
   #
   out-buf)

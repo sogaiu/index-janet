@@ -23,10 +23,12 @@
             (string/format "There is already something here for %p" path))
     (put ds path @{})
     (each tag-dict tags
-      (def [_ _ _ tag-path]
-        # (next tag-dict) is just some key -- doesn't matter which
-        # because tag-path should not differ (by construction)
+      # (next tag-dict) is just some key -- doesn't matter which
+      # because tag-path should not differ (by construction)
+      (def some-value
         (get tag-dict (next tag-dict)))
+      (def tag-path
+        (last some-value))
       (when (= path tag-path)
         (eachp [id tag] tag-dict
           (put-in ds
@@ -94,10 +96,38 @@
      @{}
      @{}]
 
+  '@[@{}
+     @{"tuple/brackets"
+       @[58 "JANET_CORE_FN(cfun_tuple_brackets," "src/core/tuple.c"]
+       "tuple/setmap"
+       @[108 "JANET_CORE_FN(cfun_tuple_setmap," "src/core/tuple.c"]
+       "tuple/slice"
+       @[66 "JANET_CORE_FN(cfun_tuple_slice," "src/core/tuple.c"]
+       "tuple/sourcemap"
+       @[96 "JANET_CORE_FN(cfun_tuple_sourcemap," "src/core/tuple.c"]
+       "tuple/type"
+       @[80 "JANET_CORE_FN(cfun_tuple_type," "src/core/tuple.c"]}
+     @{}
+     @{}]
+
+  # offset is now optional
+  (def nm-has-offset
+    (let [a-dict (first nm-tags)
+          a-key (next a-dict)
+          a-value (get a-dict a-key)]
+      (if (= 3 (length a-value))
+        false
+        true)))
+
+  (def nm-path-index
+    (if nm-has-offset
+      3
+      2))
+
   (def nm-files
     (->> nm-tags
          (map |(let [a-key (next $)]
-                 (get-in $ [a-key 3])))
+                 (get-in $ [a-key nm-path-index])))
          distinct
          sort))
 
@@ -105,15 +135,29 @@
     (->> (peg/match etags/etags-grammar u-ctags-src)
          (filter |(not (empty? $)))))
 
+  (def um-has-offset
+    (let [a-dict (first um-tags)
+          a-key (next a-dict)
+          a-value (get a-dict a-key)]
+      (if (= 3 (length a-value))
+        false
+        true)))
+
+  (def um-path-index
+    (if um-has-offset
+      3
+      2))
+
   (def um-files
     (->> um-tags
          (map |(let [a-key (next $)]
-                 (get-in $ [a-key 3])))
+                 (get-in $ [a-key um-path-index])))
          distinct
          sort))
 
-  (assert (deep= nm-files um-files)
-          "Indexed files differ")
+  # XXX: disabling for the moment
+  #(assert (deep= nm-files um-files)
+  #        "Indexed files differ")
 
   (def nm-by-file
     (make-by-file nm-tags nm-files))

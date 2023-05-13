@@ -69,6 +69,20 @@
      @{}
      @{}]
 
+  '@[@{}
+     @{"tuple/brackets"
+       @[58 "JANET_CORE_FN(cfun_tuple_brackets," "src/core/tuple.c"]
+       "tuple/setmap"
+       @[108 "JANET_CORE_FN(cfun_tuple_setmap," "src/core/tuple.c"]
+       "tuple/slice"
+       @[66 "JANET_CORE_FN(cfun_tuple_slice," "src/core/tuple.c"]
+       "tuple/sourcemap"
+       @[96 "JANET_CORE_FN(cfun_tuple_sourcemap," "src/core/tuple.c"]
+       "tuple/type"
+       @[80 "JANET_CORE_FN(cfun_tuple_type," "src/core/tuple.c"]}
+     @{}
+     @{}]
+
   )
 
 (defn etags-to-tags
@@ -77,7 +91,13 @@
   (def parsed
     (peg/match etags/etags-grammar etags-buf))
   (each dict parsed
-    (eachp [id [line _ text path]] dict
+    (eachp [id info] dict
+      (def line (first info))
+      (def text
+        (if (= 3 (length info))
+          (get info 1)
+          (get info 2)))
+      (def path (last info))
       # XXX: tabs in text could cause problems if instead of line
       #      text converted to a regular expression is used
       (array/push out-lines
