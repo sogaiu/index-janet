@@ -1,4 +1,4 @@
-(import ./index-c :as ic)
+(import ./index-j2c :as ij2c)
 (import ./index-janet :as ij)
 (import ./tags)
 
@@ -96,18 +96,18 @@
     (var src (slurp path))
     (cond
       (= "io.c" name)
-      (ic/index-janet-core-def-c! src path out-buf)
+      (ij2c/index-janet-core-def-c! src path out-buf)
       #
       (= "math.c" name)
       (do
-        (ic/index-math-c! src path out-buf)
-        (ic/index-janet-core-def-c! src path out-buf))
+        (ij2c/index-math-c! src path out-buf)
+        (ij2c/index-janet-core-def-c! src path out-buf))
       #
       (= "specials.c" name)
-      (ic/index-specials-c! src path out-buf)
+      (ij2c/index-specials-c! src path out-buf)
       #
       (= "corelib.c" name)
-      (ic/index-corelib-c! src path out-buf)
+      (ij2c/index-corelib-c! src path out-buf)
       #
       (= "asm.c" name)
       # XXX: tweak source so it can be parsed
@@ -116,7 +116,7 @@
                            ""
                            src)))
     (try
-      (ic/index-generic-c! src path out-buf)
+      (ij2c/index-generic-c! src path out-buf)
       ([e]
         (eprintf "%s %s" e path))))
 
