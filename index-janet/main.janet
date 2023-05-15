@@ -96,8 +96,7 @@
 
   (each name (os/dir "src/core/")
     (def path (string "src/core/" name))
-    # XXX
-    (var src (slurp path))
+    (def src (slurp path))
     (cond
       (= "io.c" name)
       (ij2c/index-janet-core-def-c! src path out-buf)
@@ -111,14 +110,8 @@
       (ij2c/index-specials-c! src path out-buf)
       #
       (= "corelib.c" name)
-      (ij2c/index-corelib-c! src path out-buf)
-      #
-      (= "asm.c" name)
-      # XXX: tweak source so it can be parsed - still necessary?
-      (set src
-           (string/replace "if (_setjmp(a.on_error)) {"
-                           ""
-                           src)))
+      (ij2c/index-corelib-c! src path out-buf))
+    #
     (try
       (ij2c/index-generic-c! src path out-buf)
       ([e]
