@@ -123,6 +123,16 @@
         ([e]
           (eprintf "%s %s" e path)))))
 
+  (when (dyn :ij-c2c)
+    (def path
+      "src/include/janet.h")
+    (def src
+      (slurp path))
+    (try
+      (ic/index-c! src path out-buf)
+      ([e]
+        (eprintf "%s %s" e path))))
+
   (def out-lines
     (if (= out-format "u-ctags")
       (tags/etags-to-tags out-buf)
