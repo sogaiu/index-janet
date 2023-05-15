@@ -1,3 +1,4 @@
+(import ./index-c :as ic)
 (import ./index-j2c :as ij2c)
 (import ./index-janet :as ij)
 (import ./tags)
@@ -55,6 +56,9 @@
     @{:output-format "u-ctags"
       :file-extension ""})
 
+  (when (os/getenv "IJ_C2C")
+    (setdyn :ij-c2c true))
+
   (when (os/getenv "IJ_DEBUG")
     (setdyn :ij-debug true))
 
@@ -110,7 +114,7 @@
       (ij2c/index-corelib-c! src path out-buf)
       #
       (= "asm.c" name)
-      # XXX: tweak source so it can be parsed
+      # XXX: tweak source so it can be parsed - still necessary?
       (set src
            (string/replace "if (_setjmp(a.on_error)) {"
                            ""
@@ -118,7 +122,13 @@
     (try
       (ij2c/index-generic-c! src path out-buf)
       ([e]
-        (eprintf "%s %s" e path))))
+        (eprintf "%s %s" e path)))
+    #
+    (when (dyn :ij-c2c)
+      (try
+        (ic/index-c! src path out-buf)
+        ([e]
+          (eprintf "%s %s" e path)))))
 
   (def out-lines
     (if (= out-format "u-ctags")
