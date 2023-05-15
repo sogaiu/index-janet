@@ -1,6 +1,7 @@
 (import ./index :as idx)
 
-# skip these things - see :macro-define below
+# capture part of these things, but recognize them so they
+# can be navigated "over"
 #
 # #define JANET_DEFINE_MATH2OP(name, fop, signature, doc)\
 # JANET_CORE_FN(janet_##name, signature, doc) {\
@@ -24,20 +25,20 @@
 (def col-one
   ~{:main (some (choice :comment
                         :macro-define
-                        :match
+                        :non-macro-match
                         :not-match))
-    :match (cmt (sequence (look -1 "\n")
-                          (not :s)
-                          (not "#")
-                          (not "}")
-                          (not :label)
-                          (line) (column) (position)
-                          (capture (to "\n"))
-                          "\n")
-                ,|@{:bl $0
-                    :bc $1
-                    :bp $2
-                    :text $3})
+    :non-macro-match (cmt (sequence (look -1 "\n")
+                                    (not :s)
+                                    (not "#")
+                                    (not "}")
+                                    (not :label)
+                                    (line) (column) (position)
+                                    (capture (to "\n"))
+                                    "\n")
+                          ,|@{:bl $0
+                              :bc $1
+                              :bp $2
+                              :text $3})
     :label (sequence :id ":")
     :id (some (choice :a :d "_"))
     :comment (choice (sequence "//"
@@ -45,10 +46,23 @@
                      (sequence "/*"
                                (any (if-not `*/` 1))
                                "*/"))
-    :macro-define (sequence "#define" (thru `\`) "\n"
-                            (some (sequence (thru `\`) "\n"))
-                            # turns out sometimes this is not how it ends
-                            (opt "\n}"))
+    :macro-define (choice (cmt (sequence (line) (column) (position)
+                                         (capture (sequence "#define" (to "\n")))
+                                         "\n")
+                               ,|@{:bl $0
+                                   :bc $1
+                                   :bp $2
+                                   :text $3})
+                          (cmt (sequence (line) (column) (position)
+                                         (capture (sequence "#define" (to `\`)))
+                                         `\` "\n"
+                                         (some (sequence (thru `\`) "\n"))
+                                         # sometimes this is not how it ends
+                                         (opt "\n}"))
+                               ,|@{:bl $0
+                                   :bc $1
+                                   :bp $2
+                                   :text $3}))
     :not-match 1})
 
 # see comment form below for concrete examples
@@ -399,27 +413,70 @@
 
   )
 
+(defn find-id-for-macro-define
+  [line]
+  (def g
+    ~(sequence "#define" :s+
+               (capture (to (set " (")))))
+  (def m
+    (peg/match g line))
+
+  (first m))
+
+(comment
+
+  (find-id-for-macro-define
+    "#define A ((*pc >> 8)  & 0xFF)")
+  # =>
+  "A"
+
+  (find-id-for-macro-define
+    (string "#define janet_v_free(v)         "
+            "(((v) != NULL) ? (janet_sfree(janet_v__raw(v)), 0) : 0)"))
+  # =>
+  "janet_v_free"
+
+  (find-id-for-macro-define
+    "#define vm_throw(e) do { vm_commit(); janet_panic(e); } while (0)")
+  # =>
+  "vm_throw"
+
+  (find-id-for-macro-define
+    "#define JANET_EMIT_H")
+  # =>
+  nil
+
+  )
+
 (defn separate-lines
   [samples]
   (def scan-from-right @[])
   # typedef, enum, struct
   (def td-en-st @[])
+  (def macro-defines @[])
+  (def unmatched @[])
   (loop [i :in samples]
-    (def s
-      (get i :text))
+    (def s (get i :text))
     (when (not (or (string/has-prefix? "extern " s)
                    (peg/match '(sequence (some (range "AZ" "09" "__"))
                                          "(")
                               s)))
-      (if (or (string/has-prefix? "typedef " s)
-              (string/has-prefix? "enum " s)
-              (string/has-prefix? "struct " s))
+      (cond
+        (or (string/has-prefix? "typedef " s)
+            (string/has-prefix? "enum " s)
+            (string/has-prefix? "struct " s))
         (array/push td-en-st i)
-        (when (not (peg/match '(some (choice :a :d "_"))
-                              (string/reverse s)))
-          (array/push scan-from-right i)))))
+        #
+        (string/has-prefix? "#define" s)
+        (array/push macro-defines i)
+        #
+        (not (peg/match '(some (choice :a :d "_"))
+                        (string/reverse s)))
+        (array/push scan-from-right i)
+        # for introspection
+        (array/push unmatched i))))
   #
-  [scan-from-right td-en-st])
+  [scan-from-right td-en-st macro-defines unmatched])
 
 (comment
 
@@ -435,7 +492,7 @@
       # XXX: src or path?
       (put item :src src)))
 
-  (def [scan-from-right td-en-st]
+  (def [scan-from-right td-en-st macro-defines unmatched]
     (separate-lines samples))
 
   (var cnt 0)
@@ -461,7 +518,16 @@
       (++ cnt))
     (printf "%p" result))
 
-  # 1293
+  (each i (sort-by |(get $ :text) macro-defines)
+    (def s
+      (get i :text))
+    (def result
+      (find-id-for-macro-define s))
+    (when (string? result)
+      (++ cnt))
+    (printf "%p" result))
+
+  # 1293, 1629
   cnt
 
   )
@@ -481,10 +547,14 @@
      (slurp
        (string (os/getenv "HOME") "/src/janet/src/core/ev.c")))
 
+  '(def src
+     (slurp
+       (string (os/getenv "HOME") "/src/janet/src/core/vector.h")))
+
   (def caps
     (peg/match col-one src))
 
-  (def [scan-from-right td-en-st]
+  (def [scan-from-right td-en-st macro-defines unmatched]
     (separate-lines caps))
 
   # XXX: what about duplicates?
@@ -493,11 +563,11 @@
       (get item :text))
     (def id-maybe
       (find-id-for-rest line))
-    (def line-no
-      (get item :bl))
-    (def pos
-      (get item :bp))
     (when (string? id-maybe)
+      (def line-no
+        (get item :bl))
+      (def pos
+        (get item :bp))
       (array/push results
                   [line
                    id-maybe
@@ -511,9 +581,25 @@
       (get item :bp))
     (def id-maybe
       (find-id-for-td-en-st-line line pos src))
-    (def line-no
-      (get item :bl))
     (when (string? id-maybe)
+      (def line-no
+        (get item :bl))
+      (array/push results
+                  [line
+                   id-maybe
+                   (string line-no)
+                   (string pos)])))
+  # XXX: what about duplicates?
+  (each item macro-defines
+    (def line
+      (get item :text))
+    (def pos
+      (get item :bp))
+    (def id-maybe
+      (find-id-for-macro-define line))
+    (when (string? id-maybe)
+      (def line-no
+        (get item :bl))
       (array/push results
                   [line
                    id-maybe
