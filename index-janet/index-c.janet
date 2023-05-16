@@ -605,6 +605,50 @@
                    id-maybe
                    (string line-no)
                    (string pos)])))
+  # enum constants
+  (each item td-en-st
+    (def line
+      (get item :text))
+    (def pos
+      (get item :bp))
+    (when (or (and (string/has-prefix? "enum " line)
+                   (string/has-suffix? "{" line))
+              (and (string/has-prefix? "typedef enum " line)
+                   (string/has-suffix? "{" line)))
+      (def m
+        (peg/match
+          ~{:main (sequence (opt (sequence "typedef" :s+))
+                            "enum" :s+
+                            (opt (sequence :id :s+))
+                            "{" "\n"
+                            (some (cmt (sequence (not "}")
+                                                 (line) (column) (position)
+                                                 (capture (to "\n")) "\n")
+                                       ,|@{:bl $0
+                                           :bc $1
+                                           :bp $2
+                                           :text $3})))
+            :id (some (choice :a :d "_"))}
+          src pos))
+      (when m
+        (each item m
+          (def line-no
+            (get item :bl))
+          (def pos
+            (get item :bp))
+          (def line
+            (get item :text))
+          (def trimmed
+            (string/trim line))
+          (def id
+            (string/slice trimmed
+                          0 (or (string/find "," trimmed)
+                                -1)))
+          (array/push results
+                      [line
+                       id
+                       (string line-no)
+                       (string pos)])))))
   #
   results)
 
