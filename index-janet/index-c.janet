@@ -293,6 +293,10 @@
   (def g
     ~(sequence
        :s*
+       # XXX: not the most general
+       (any (choice (sequence "/*" (thru `*/`))
+                    (sequence (thru "//"))))
+       :s*
        (choice
          (sequence ","
                    (thru "(")
