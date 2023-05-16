@@ -15,7 +15,7 @@
     ``
     (<::type '[capture [choice "defn-" "defn"
                                "defdyn"
-                               "defmacro" "defmacro-"
+                               "defmacro-" "defmacro"
                                "def-" "def"
                                "var-" "var"]]>
      <::name :blob>
