@@ -134,7 +134,6 @@
               (:ws/horiz @{:bc 5 :bl 1 :bp 4 :ec 6 :el 1 :ep 5} " ")
               (:blob @{:bc 6 :bl 1 :bp 5 :ec 7 :el 1 :ep 6} "1"))
 
-
   (-> (peg/match grammar `@[:a :b :c]`)
       (array/slice 3 (dec (- 3))))
   # =>
