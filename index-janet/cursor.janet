@@ -15,7 +15,8 @@
   (defn reset
     []
     (set counter 0)
-    (table/clear id->node))
+    (table/clear id->node)
+    (table/clear loc->id))
 
   (defn opaque-node
     [node-type peg-form]
