@@ -24,7 +24,7 @@ idx-janet
 
 This should produce a `tags` file.
 
-For `TAGS (emacs):
+For `TAGS` (emacs):
 
 ```
 cd ~/src/janet
