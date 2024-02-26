@@ -1,6 +1,6 @@
 # index-janet
 
-Generate tags / TAGS files for Janet's source code.
+Generate `tags` / `TAGS` files for Janet's source code.
 
 The index files provide lookups for Janet identifiers:
 
@@ -27,7 +27,7 @@ cd ~/src/janet
 idx-janet
 ```
 
-This should produce a `tags` file.
+This should produce a `tags` file, typically used by vim / neovim.
 
 For `TAGS` (emacs):
 
@@ -36,5 +36,5 @@ cd ~/src/janet
 IJ_OUTPUT_FORMAT=etags idx-janet
 ```
 
-This should produce a `TAGS` file.
+This should produce a `TAGS` file, typically used by emacs.
 
