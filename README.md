@@ -1,6 +1,11 @@
 # index-janet
 
-Generate tags / TAGS files for janet source code.
+Generate tags / TAGS files for Janet's source code.
+
+The index files provide lookups for Janet identifiers:
+
+* Janet -> Janet (e.g. `if-let`)
+* Janet -> C (e.g. `length` or `def`)
 
 ## Setup
 
