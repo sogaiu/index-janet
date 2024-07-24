@@ -50,7 +50,7 @@
             (when-let [arg (get argv 1)]
               (= "--help" arg)))
     (print usage)
-    (os/exit 0))
+    (break 0))
 
   (def opts
     @{:output-format "u-ctags"
@@ -153,7 +153,5 @@
         (when (not (or (string/has-suffix? "\r" line)
                        (string/has-suffix? "\n" line)))
           (file/write tf "\n"))))
-    (file/flush tf))
-
-  (os/exit 0))
+    (file/flush tf)))
 
