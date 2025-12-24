@@ -1,4 +1,4 @@
-(import ../index-janet/c-query :as cq)
+(import ../src/c-query :as cq)
 
 (comment
 

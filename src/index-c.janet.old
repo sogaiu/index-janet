@@ -1,0 +1,167 @@
+(import ./index :as idx)
+
+########################################################################
+
+(defn find-c-tags
+  [src]
+
+  '(def src
+     (slurp
+       (string (os/getenv "HOME") "/src/janet/src/core/math.c")))
+
+  # skip these things - see :macro-define below
+  #
+  # #define JANET_DEFINE_MATH2OP(name, fop, signature, doc)\
+  # JANET_CORE_FN(janet_##name, signature, doc) {\
+  #     janet_fixarity(argc, 2); \
+  #     double lhs = janet_getnumber(argv, 0); \
+  #     double rhs = janet_getnumber(argv, 1); \
+  #     return janet_wrap_number(fop(lhs, rhs)); \
+  # }
+  #
+  # #define OPMETHOD(T, type, name, oper) \
+  # static Janet cfun_it_##type##_##name(int32_t argc, Janet *argv) { \
+  #     janet_arity(argc, 2, -1); \
+  #     T *box = janet_abstract(&janet_##type##_type, sizeof(T)); \
+  #     *box = janet_unwrap_##type(argv[0]); \
+  #     for (int32_t i = 1; i < argc; i++) \
+  #         /* This avoids undefined behavior. See above for why. */ \
+  #         *box = (T) ((uint64_t) (*box)) oper ((uint64_t) janet_unwrap_##type(argv[i])); \
+  #     return janet_wrap_abstract(box); \
+  # } \
+
+  (def col-one
+    ~{:main (some (choice :comment
+                          :macro-define
+                          :match
+                          :not-match))
+      :match (sequence (look -1 "\n")
+                       (not :s)
+                       (not "#")
+                       (not "}")
+                       (not :label)
+                       (capture (thru "\n")))
+      :label (sequence :id ":")
+      :id (some (choice :a :d "_"))
+      :comment (choice (sequence "//"
+                                 (any (if-not (set "\r\n") 1)))
+                       (sequence "/*"
+                                 (any (if-not `*/` 1))
+                                 "*/"))
+      :macro-define (sequence "#define" (thru `\`) "\n"
+                              (some (sequence (thru `\`) "\n"))
+                              # turns out sometimes this is not how it ends
+                              (opt "\n}"))
+      :not-match 1})
+
+  (def m
+    (peg/match col-one src))
+
+  (each l m
+    (printf "%p" l))
+
+  (do
+    (def dir
+      (string (os/getenv "HOME") "/src/janet/src/core"))
+    (def of (file/open "/tmp/col-one.txt" :w))
+    (each path (os/dir dir)
+      (def src
+        (slurp (string dir "/" path)))
+      (each item (peg/match col-one src)
+        (file/write of (string/format "%s" item))))
+    (file/close of))
+
+  (def p
+  ~{:main
+     (sequence 
+             #"\n"
+             #(sequence 
+             #(not :label)
+             #(not "}")
+             #(not "#")
+             #(not "{")
+             #(choice 
+             #(sequence
+             # XXX: using 2 instead of some worked better earlier
+             (some
+               (sequence (some (if-not (choice :s "(") 1))
+                         :s+))
+             (any "*")
+             #(line) (column) (position)
+             (capture :id)
+             "("
+             (any 1)
+             #(thru "\n")
+             (position)
+             #)
+             #  )
+             #          )
+        )
+    #
+    :id (some (choice :a :d "_"))
+    #
+    :label (sequence :id ":")})
+
+  (peg/match p "static int janet_rng_get(void *p, Janet key, Janet *out) {")
+
+  # why does this match
+  (peg/match p "static int janet_rng_get(void")
+
+  # why does this not match
+  (peg/match p "static int janet_rng_get(void *p")
+
+  (def query-peg
+    ~{:main (some (choice :match
+                          :non-match))
+      #
+      :match
+      (sequence 
+        "\n"
+        #(sequence 
+          (not :label)
+                  (not "}")
+                  (not "#")
+                  (not "{")
+                  #(choice 
+                    #(sequence
+                      (some 
+                        (sequence (some (if-not :s 1))
+                                  :s+))
+                      #(line) (column) (position)
+                      (capture :id)
+                      "("
+        # (thru "\n")
+                      #)
+                  #  )
+        #          )
+        )
+      #
+      :id (some (choice :a :d "_"))
+      #
+      :label (sequence :id ":")
+      #
+      :non-match (choice :comment
+                         :macro-define
+                         1)
+      #
+      :comment (choice (sequence "//"
+                                 (any (if-not (set "\r\n") 1)))
+                       (sequence "/*"
+                                 (any (if-not `*/` 1))
+                                 "*/"))
+      # XXX: only multi-line of certain type
+      :macro-define (sequence "#define" (thru `\`) "\n"
+                              (some (sequence (thru `\`) "\n"))
+                              "}")})
+
+  (def caps
+    (peg/match query-peg src))
+
+  (idx/get-all-pieces src caps))
+
+########################################################################
+
+(defn index-c!
+  [src path out-buf]
+  (idx/index-file! src path find-c-tags out-buf))
+

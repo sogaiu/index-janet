@@ -1,10 +1,29 @@
-(import ./janet-peg :as jp)
+(import ./janet-peg :prefix "")
 # to make generic cursor functions available
-(import ./cursor :prefix "" :export true)
+#(import ./cursor :prefix "" :export true)
+(import ./cursor :prefix "")
 
-(defn make-infra
+(def jc/init-infra c/init-infra)
+
+(def jc/make-cursor c/make-cursor)
+
+(def jc/right c/right)
+
+(def jc/up c/up)
+
+(def jc/down c/down)
+
+(def jc/df-next c/df-next)
+
+(def jc/rightmost c/rightmost)
+
+(def jc/left c/left)
+
+(def jc/df-prev c/df-prev)
+
+(defn jc/make-infra
   []
-  (init-infra jp/make-grammar))
+  (jc/init-infra jp/make-grammar))
 
 (comment
 
@@ -13,7 +32,7 @@
         :node-table id->node
         :loc-table loc->id
         :reset reset}
-    (make-infra))
+    (jc/make-infra))
 
   (reset)
 

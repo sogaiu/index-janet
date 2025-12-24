@@ -3,9 +3,6 @@
   :url "https://github.com/sogaiu/index-janet"
   :repo "git+https://github.com/sogaiu/index-janet.git")
 
-(declare-source
-  :source @["index-janet"])
-
 (declare-binscript
   :main "idx-janet"
   :is-janet true)

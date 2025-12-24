@@ -1,4 +1,4 @@
-(import ../index-janet/etags)
+(import ../src/etags)
 
 (comment
 

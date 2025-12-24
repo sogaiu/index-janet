@@ -1,4 +1,4 @@
-(import ../index-janet/c-cursor :as cc)
+(import ../src/c-cursor :as cc)
 
 (comment
 

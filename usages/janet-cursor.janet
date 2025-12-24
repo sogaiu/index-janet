@@ -1,4 +1,4 @@
-(import ../index-janet/janet-cursor :as jc)
+(import ../src/janet-cursor :as jc)
 
 (comment
 

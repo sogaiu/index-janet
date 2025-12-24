@@ -2,7 +2,7 @@
   []
   {# describes what to test - file and dir paths
    :jeat-target-spec
-   ["index-janet" "usages"]
+   ["idx-janet" "src" "usages"]
    # describes what to skip - file paths only
    #:jeat-exclude-spec
    #[]

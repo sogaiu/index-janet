@@ -1,4 +1,4 @@
-(import ../index-janet/janet-query :as jq)
+(import ../src/janet-query :as jq)
 
 (comment
 

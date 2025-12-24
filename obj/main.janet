@@ -1,7 +1,9 @@
-(import ./index-c :as ic)
-(import ./index-j2c :as ij2c)
-(import ./index-janet :as ij)
-(import ./tags)
+#! /usr/bin/env janet
+
+(import ./index-c :prefix "")
+(import ./index-j2c :prefix "")
+(import ./index-janet :prefix "")
+(import ./tags :prefix "")
 
 (def usage
   ``

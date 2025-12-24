@@ -1,6 +1,6 @@
-(import ./loc :as l)
+(import ./loc :prefix "")
 
-(defn init-infra
+(defn c/init-infra
   [make-grammar]
   (var counter 0)
 
@@ -133,13 +133,13 @@
    :reset reset
    :parse par})
 
-(defn make-cursor
+(defn c/make-cursor
   [node-table &opt node]
   (default node (get node-table 0))
   {:node node
    :table node-table})
 
-(defn right
+(defn c/right
   [{:node n :table n-tbl}]
   (def [_ attrs _] n)
   (when-let [pid (get attrs :pid)
@@ -150,14 +150,14 @@
         {:node next-sibling
          :table n-tbl}))))
 
-(defn up
+(defn c/up
   [{:node n :table n-tbl}]
   (def [_ attrs _] n)
   (when-let [pid (get attrs :pid)]
     {:node (get n-tbl pid)
      :table n-tbl}))
 
-(defn down
+(defn c/down
   [{:node n :table n-tbl}]
   (def [_ _ & rest] n)
   (when (tuple? rest)
@@ -166,51 +166,21 @@
         {:node first-elt
          :table n-tbl}))))
 
-# XXX: using node version of up, down, right might be much better?
-# XXX: is this version correct?
-(defn df-next-not-quite-correct
+(defn c/df-next
   [crs]
   #
   (defn helper
     [a-crs]
-    (if-let [down-cand (down a-crs)]
-      down-cand
-      (if-let [right-cand (right a-crs)]
-        right-cand
-        # start climbing up if possible
-        (do
-          (var curr-cand (up a-crs))
-          # try to go up until it's possible to go right
-          (while curr-cand
-            (when (right a-crs)
-              (break))
-            (set curr-cand (up curr-cand)))
-          #
-          (if curr-cand
-            # start over with right node
-            (helper (right curr-cand))
-            # reached the top
-            nil)))))
-  #
-  (if-let [result (helper crs)]
-    result
-    :back-at-top))
-
-(defn df-next
-  [crs]
-  #
-  (defn helper
-    [a-crs]
-    (if-let [up-cand (up a-crs)]
-      (or (right up-cand)
+    (if-let [up-cand (c/up a-crs)]
+      (or (c/right up-cand)
           (helper up-cand))
       :back-at-top))
   # XXX: this part might be off a bit
-  (or (down crs)
-      (right crs)
+  (or (c/down crs)
+      (c/right crs)
       (helper crs)))
 
-(defn rightmost
+(defn c/rightmost
   [{:node node :table node-table}]
   (def [_ attrs _] node)
   (when-let [pid (get attrs :pid)
@@ -220,7 +190,7 @@
         {:node last-sibling
          :table node-table}))))
 
-(defn left
+(defn c/left
   [{:node n :table n-tbl}]
   (def [_ attrs _] n)
   (when-let [pid (get attrs :pid)
@@ -231,16 +201,16 @@
         {:node prev-sibling
          :table n-tbl}))))
 
-(defn df-prev
+(defn c/df-prev
   [crs]
   #
   (defn helper
     [a-crs]
-    (if-let [down-cand (down a-crs)]
-      (helper (rightmost down-cand))
+    (if-let [down-cand (c/down a-crs)]
+      (helper (c/rightmost down-cand))
       a-crs))
   #
-  (if-let [left-cand (left crs)]
+  (if-let [left-cand (c/left crs)]
     (helper left-cand)
-    (up crs)))
+    (c/up crs)))
 
