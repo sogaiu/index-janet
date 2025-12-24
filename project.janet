@@ -4,7 +4,7 @@
   :repo "git+https://github.com/sogaiu/index-janet.git")
 
 (declare-binscript
-  :main "idx-janet"
+  :main "idx.janet"
   :is-janet true)
 
 (def proj-dir
@@ -50,7 +50,7 @@
   (os/cd janet-src-path)
   (os/setenv "IJ_OUTPUT_FORMAT" "etags")
   (os/execute ["janet"
-               (string dir "/idx-janet")]
+               (string dir "/idx.janet")]
               :px)
   (unless (os/stat tags-path)
     (eprint "Something went wrong, `TAGS` file may not have been created.")

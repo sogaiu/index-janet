@@ -1,3 +1,3 @@
 {:start-path "src/main.janet"
  :obj-path "obj"
- :out-path "idx-janet"}
+ :out-path "idx.janet"}

@@ -15,7 +15,7 @@ cd index-janet
 jpm install
 ```
 
-This should install a script named `idx-janet`.
+This should install a script named `idx.janet`.
 
 ## Usage
 
@@ -24,7 +24,7 @@ generate `tags`:
 
 ```
 cd ~/src/janet
-idx-janet
+idx.janet
 ```
 
 This should produce a `tags` file, typically used by vim / neovim.
@@ -33,7 +33,7 @@ For `TAGS` (emacs):
 
 ```
 cd ~/src/janet
-IJ_OUTPUT_FORMAT=etags idx-janet
+IJ_OUTPUT_FORMAT=etags idx.janet
 ```
 
 This should produce a `TAGS` file, typically used by emacs.

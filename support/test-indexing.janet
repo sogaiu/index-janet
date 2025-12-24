@@ -18,7 +18,7 @@
     # the script path is relative to the `janet` subdir of the root dir
     # of this project because the script is invoked from inside the
     # `janet` subdir
-    (string "../idx-janet"))
+    (string "../idx.janet"))
   (def repo-dir-name "janet")
   (def repo-url "https://github.com/janet-lang/janet")
   (def dflt-branch "master")

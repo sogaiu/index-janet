@@ -2671,7 +2671,7 @@ search-string,idline,offset-from-start
 
 (def usage
   ``
-  Usage: idx-janet
+  Usage: idx.janet
 
   Generate `tags` / `TAGS` file for Janet source code
 
@@ -2689,7 +2689,7 @@ search-string,idline,offset-from-start
 
   To create a `TAGS` instead (e.g. for use with emacs), set the
   `IJ_OUTPUT_FORMAT` environment variable to have the value `etags`,
-  before invoking `idx-janet`.
+  before invoking `idx.janet`.
 
   For example, on a *nix machine with certain shells, this could be
   something like:
