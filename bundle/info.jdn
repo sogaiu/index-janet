@@ -7,14 +7,18 @@
    :url "https://github.com/sogaiu/some-bundle-bits"
    :tag "7ddb7ec53a6eb8c81b0c22bb7710a01fff57a759"
    :paths [["sbb.janet" "bundle/"]]}
-  {:name "niche"
-   :url "https://github.com/sogaiu/niche"
-   :tag "3f744cfb02b472971f82e78f16a027908a4bd717"
-   :paths [["niche.janet" "bin/"]]}
+  {:name "janet-etags"
+   :url "https://github.com/sogaiu/janet-etags"
+   :tag "df6e4fd91e86b4e7b90f867eec7b3592727e7abc"
+   :paths [["etags.janet" "src/"]]}
   {:name "jell"
    :url "https://github.com/sogaiu/jell"
    :tag "8277c882b77bca4f629a2b1559732631998842ea"
-   :paths [["jell" "bin/"]]}]
+   :paths [["jell" "bin/"]]}
+  {:name "niche"
+   :url "https://github.com/sogaiu/niche"
+   :tag "3f744cfb02b472971f82e78f16a027908a4bd717"
+   :paths [["niche.janet" "bin/"]]}]
 
  :binscripts
  [{:main "idx.janet"
